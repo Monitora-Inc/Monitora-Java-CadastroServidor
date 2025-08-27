@@ -58,15 +58,15 @@ public class ApiClient {
         }
     }
 
-    public static HttpResponse<String> adicionarServidor() {
-        try {
-            HttpClient client = HttpClient.newHttpClient();
-
-        } catch(Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+//    public static HttpResponse<String> adicionarServidor() {
+//        try {
+//            HttpClient client = HttpClient.newHttpClient();
+//
+//        } catch(Exception e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
 
     public static void main(String[] args) {
         autenticarUsuario();
