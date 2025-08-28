@@ -1,3 +1,4 @@
+import com.google.gson.Gson;
 import oshi.SystemInfo;
 
 public class Servidor {
@@ -15,20 +16,19 @@ public class Servidor {
         this.sistemaOperacional = sistemaOperacional;
     }
 
-    public static Servidor capturarInformacoesComputador() {
+    public static String capturarInformacoesComputador() {
         SystemInfo si = new SystemInfo();
 
+        String uuid = Uuid.buscarUuid();
         String modeloCPU = si.getHardware().getProcessor().getProcessorIdentifier().getName();
         long qtdRam = si.getHardware().getMemory().getTotal() / (1024 * 1024 * 1024);
         String sistemaOperacional = si.getOperatingSystem().toString();
         long qtdDisco = si.getHardware().getDiskStores().getFirst().getSize() / (1024 * 1024 * 1024);
 
-        Servidor servidor = new Servidor("aa", modeloCPU, qtdRam, qtdDisco, sistemaOperacional);
+        Servidor servidor = new Servidor(uuid, modeloCPU, qtdRam, qtdDisco, sistemaOperacional);
+        String json = new Gson().toJson(servidor);
+        System.out.println(json);
 
-        return servidor;
-    }
-
-    public static void main(String[] args) {
-        capturarInformacoesComputador();
+        return json;
     }
 }

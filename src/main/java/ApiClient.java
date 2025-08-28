@@ -5,16 +5,7 @@ import java.net.http.HttpResponse;
 import java.util.Scanner;
 
 public class ApiClient {
-    public static HttpResponse<String> autenticarUsuario() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Faça o login com o mesmo usuário de nosso sistema.\n");
-
-        System.out.print("Informe seu email: ");
-        String emailUsuario = scanner.nextLine();
-
-        System.out.print("Informe sua senha: ");
-        String senhaUsuario = scanner.nextLine();
-
+    public static HttpResponse<String> autenticarUsuario(String emailUsuario, String senhaUsuario) {
         try {
             HttpClient client = HttpClient.newHttpClient();
 
@@ -29,7 +20,6 @@ public class ApiClient {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             return response;
-
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -58,17 +48,15 @@ public class ApiClient {
         }
     }
 
-//    public static HttpResponse<String> adicionarServidor() {
+//    public static HttpResponse<String> adicionarServidor(String json) {
 //        try {
 //            HttpClient client = HttpClient.newHttpClient();
+//
+//
 //
 //        } catch(Exception e) {
 //            e.printStackTrace();
 //            return null;
 //        }
 //    }
-
-    public static void main(String[] args) {
-        autenticarUsuario();
-    }
 }
