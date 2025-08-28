@@ -1,11 +1,16 @@
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import java.net.http.HttpResponse;
 import java.util.Scanner;
 
 public class Main {
-    public static String login() {
+    public static JsonObject login() {
         Scanner scanner = new Scanner(System.in);
 
         String body = "";
+        JsonObject jsonUsuario = new JsonObject();
 
         while(true) {
             System.out.print("\nInforme seu email: ");
@@ -20,12 +25,30 @@ public class Main {
             if(body.equals("Email e/ou senha inválido(s)")) {
                 System.out.println("\n⚠\uFE0F " + response.body());
             } else {
+                jsonUsuario = JsonParser.parseString(body).getAsJsonObject();
+
                 System.out.println("\nCadastro realizado com sucesso!");
-                break;
+
+                return jsonUsuario;
             }
         }
+    }
 
-        return body;
+    public static void adicionarServidor(String idEmpresa) {
+        String uuid = Uuid.criarUuid();
+
+        JsonObject jsonServidor = Servidor.capturarInformacoesComputador();
+
+        jsonServidor.addProperty("uuid", uuid);
+        jsonServidor.addProperty("idEmpresa", idEmpresa);
+
+        String json = new Gson().toJson(jsonServidor);
+
+        ApiClient.adicionarServidor(json);
+    }
+
+    public static void atualizarServidor(String uuid) {
+
     }
 
     public static void main(String[] args) {
@@ -40,9 +63,23 @@ public class Main {
                 Para iniciar, pressione ENTER:""");
         String iniciar = scanner.nextLine();
 
-        String informacoesUsuarios = login();
+        JsonObject informacoesUsuarios = login();
 
+        String idEmpresa = informacoesUsuarios.get("fkEmpresa").getAsString();
 
+        if(Uuid.verificarArquivoUuid()) {
+            String uuid = Uuid.buscarUuid();
+
+            HttpResponse<String> response = ApiClient.buscarServidorUUID(uuid);
+
+            if(response.statusCode() == 403) {
+                adicionarServidor(idEmpresa);
+            } else {
+                atualizarServidor(uuid);
+            }
+        } else {
+            adicionarServidor(idEmpresa);
+        }
 
     }
 }

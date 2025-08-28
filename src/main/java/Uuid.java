@@ -2,27 +2,21 @@ import java.io.*;
 import java.util.UUID;
 
 public class Uuid {
-    public static final String arquivoNome = ".uuid";
+    public static File arquivo = new File(".uuid");
+
+    public static boolean verificarArquivoUuid() {
+        return arquivo.exists();
+    }
 
     public static String buscarUuid() {
-        File arquivo = new File(arquivoNome);
-
-        try {
-            if(arquivo.exists()) {
-                try (BufferedReader reader = new BufferedReader(new FileReader(arquivo))) {
-                    return reader.readLine();
-                }
-            } else {
-                return criarUuid();
-            }
-        } catch(IOException e) {
-            throw new RuntimeException("Erro ao acessar o arquivo de uuid da máquina");
+        try (BufferedReader reader = new BufferedReader(new FileReader(arquivo))) {
+            return reader.readLine();
+        } catch (IOException e) {
+            throw new RuntimeException("Erro ao acessar o arquivo de UUID da máquina");
         }
     }
 
     public static String criarUuid() {
-        File arquivo = new File(arquivoNome);
-
         String uuid = UUID.randomUUID().toString();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(arquivo))) {
             writer.write(uuid);
