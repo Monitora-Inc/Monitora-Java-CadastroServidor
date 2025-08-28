@@ -1,10 +1,7 @@
-import com.google.gson.JsonObject;
-
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Scanner;
 
 public class ApiClient {
     public static HttpResponse<String> autenticarUsuario(String emailUsuario, String senhaUsuario) {
@@ -54,7 +51,6 @@ public class ApiClient {
         try {
             HttpClient client = HttpClient.newHttpClient();
 
-            System.out.println("json" + json);
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("http://localhost:3333/servidores/adicionarServidor"))
                     .header("Content-Type", "application/json")
@@ -65,6 +61,25 @@ public class ApiClient {
 
             return response;
 
+        } catch(Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static HttpResponse<String> atualizarServidor(String json) {
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:3333/servidores/atualizarServidor"))
+                    .header("Content-Type", "application/json")
+                    .PUT(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            return response;
         } catch(Exception e) {
             e.printStackTrace();
             return null;

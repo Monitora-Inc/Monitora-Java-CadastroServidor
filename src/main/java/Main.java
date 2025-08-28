@@ -27,15 +27,19 @@ public class Main {
             } else {
                 jsonUsuario = JsonParser.parseString(body).getAsJsonObject();
 
-                System.out.println("\nCadastro realizado com sucesso!");
+                System.out.println("\n✅ Cadastro realizado com sucesso!");
 
                 return jsonUsuario;
             }
         }
     }
 
-    public static void adicionarServidor(String idEmpresa) {
-        String uuid = Uuid.criarUuid();
+    public static void adicionarServidor(String idEmpresa, String uuid) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("\nServidor ainda não cadastrado. Efetuaremos o cadastro em nosso sistema.");
+        System.out.print("Para prosseguir, pressione ENTER: ");
+        String continuar = scanner.nextLine();
 
         JsonObject jsonServidor = Servidor.capturarInformacoesComputador();
 
@@ -44,18 +48,36 @@ public class Main {
 
         String json = new Gson().toJson(jsonServidor);
 
-        ApiClient.adicionarServidor(json);
+        HttpResponse<String> response = ApiClient.adicionarServidor(json);
+
+        System.out.println("\n" + response.body());
     }
 
     public static void atualizarServidor(String uuid) {
+        Scanner scanner = new Scanner(System.in);
 
+        System.out.println("\nServidor já cadastrado. Atualizaremos as informações em nosso sistema.");
+        System.out.print("Para prosseguir, pressione ENTER: ");
+        String continuar = scanner.nextLine();
+
+        JsonObject jsonServidor = Servidor.capturarInformacoesComputador();
+        jsonServidor.addProperty("uuid", uuid);
+
+        String json = new Gson().toJson(jsonServidor);
+
+        HttpResponse<String> response = ApiClient.atualizarServidor(json);
+
+        System.out.println("\n" + response.body());
     }
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
         System.out.print("""
-                Este software tem como objetivo cadastrar seu servidor ao nosso sistema para que futuramente possamos monitorá-lo.
+                
+                Este software tem como objetivo cadastrar seu servidor em nosso sistema para que futuramente possamos monitorá-lo,
+                ou caso já cadastrado, atualizar as informações em nosso sistema.
+                
                 Para utilizá-lo:
                     - É necessária uma conexão com a internet;
                     - Será solicitado um login, utilize as mesmas credencias usadas em nosso website.
@@ -73,12 +95,13 @@ public class Main {
             HttpResponse<String> response = ApiClient.buscarServidorUUID(uuid);
 
             if(response.statusCode() == 403) {
-                adicionarServidor(idEmpresa);
+                adicionarServidor(idEmpresa, uuid);
             } else {
                 atualizarServidor(uuid);
             }
         } else {
-            adicionarServidor(idEmpresa);
+            String uuid = Uuid.criarUuid();
+            adicionarServidor(idEmpresa, uuid);
         }
 
     }
