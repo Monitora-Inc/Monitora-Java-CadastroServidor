@@ -4,43 +4,35 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 public class ApiClient {
-    public static HttpResponse<String> autenticarUsuario(String emailUsuario, String senhaUsuario) {
+
+    private static final String BASE_URL = "http://localhost:3333";
+
+    public static HttpResponse<String> autenticarUsuario(String email, String senha) {
         try {
             HttpClient client = HttpClient.newHttpClient();
-
-            String url = String.format("http://localhost:3333/usuarios/autenticar/%s/%s", emailUsuario, senhaUsuario);
-            URI uri = URI.create(url);
+            String url = String.format("%s/usuarios/autenticar/%s/%s", BASE_URL, email, senha);
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(uri)
+                    .uri(URI.create(url))
                     .GET()
                     .build();
 
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            return response;
+            return client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public static HttpResponse<String> buscarServidorUUID(String uuid) {
+    public static HttpResponse<String> listarServidores(int idEmpresa) {
         try {
             HttpClient client = HttpClient.newHttpClient();
-
-            String url = String.format("http://localhost:3333/servidores/buscarServidorUUID/%s", uuid);
-            URI uri = URI.create(url);
-
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(uri)
+                    .uri(URI.create(BASE_URL + "/servidores/listar/" + idEmpresa))
                     .GET()
                     .build();
 
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            return response;
-
+            return client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -52,35 +44,45 @@ public class ApiClient {
             HttpClient client = HttpClient.newHttpClient();
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:3333/servidores/adicionarServidor"))
+                    .uri(URI.create("http://localhost:3333/servidores/adicionar"))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(json))
                     .build();
 
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            return response;
-
-        } catch(Exception e) {
+            return client.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public static HttpResponse<String> atualizarServidor(String json) {
+
+    public static HttpResponse<String> atualizarServidor(int idServidor, String json) {
         try {
             HttpClient client = HttpClient.newHttpClient();
-
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:3333/servidores/atualizarServidor"))
+                    .uri(URI.create(BASE_URL + "/servidores/atualizar/" + idServidor))
                     .header("Content-Type", "application/json")
                     .PUT(HttpRequest.BodyPublishers.ofString(json))
                     .build();
 
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return client.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-            return response;
-        } catch(Exception e) {
+    public static HttpResponse<String> excluirServidor(int idServidor) {
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(BASE_URL + "/servidores/excluir/" + idServidor))
+                    .DELETE()
+                    .build();
+
+            return client.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }

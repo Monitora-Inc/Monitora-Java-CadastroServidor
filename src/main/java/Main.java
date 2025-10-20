@@ -1,108 +1,171 @@
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
 import java.net.http.HttpResponse;
 import java.util.Scanner;
 
 public class Main {
-    public static JsonObject login() {
-        Scanner scanner = new Scanner(System.in);
 
-        String body = "";
-        JsonObject jsonUsuario = new JsonObject();
+    private static final Scanner scanner = new Scanner(System.in);
 
-        while(true) {
-            System.out.print("\nInforme seu email: ");
-            String emailUsuario = scanner.nextLine();
 
-            System.out.print("Informe sua senha: ");
-            String senhaUsuario = scanner.nextLine();
 
-            HttpResponse<String> response = ApiClient.autenticarUsuario(emailUsuario, senhaUsuario);
-            body = response.body();
 
-            if(body.equals("Email e/ou senha inválido(s)")) {
-                System.out.println("\n⚠\uFE0F " + response.body());
+        private static int idEmpresaLogada = -1; // -1 indica que ninguém está logado
+
+        //Getter para retornar
+        public static int getIdEmpresaLogada() {
+            return idEmpresaLogada;
+        }
+
+        // Metodo auxiliar para extrair o ID da empresa do JSON
+        public static int getIdEmpresaFromJson(String jsonBody) throws Exception {
+            JsonObject usuarioJson = JsonParser.parseString(jsonBody).getAsJsonObject();
+            return usuarioJson.get("empresaId").getAsInt();
+        }
+
+
+    public static void login() {
+        while (true) {
+            System.out.print("\nEmail: ");
+            String email = scanner.nextLine();
+
+            System.out.print("Senha: ");
+            String senha = scanner.nextLine();
+
+            HttpResponse<String> response = ApiClient.autenticarUsuario(email, senha);
+            String body = response.body();
+
+
+            if (response == null || body == null || body.contains("inválido")) {
+                System.out.println("\n⚠ Email e/ou senha inválido(s)");
             } else {
-                jsonUsuario = JsonParser.parseString(body).getAsJsonObject();
+                try {
+                    // Extrai e salca o ID na variável estática
+                    idEmpresaLogada = getIdEmpresaFromJson(body);
 
-                System.out.println("\n✅ Cadastro realizado com sucesso!");
-
-                return jsonUsuario;
+                    System.out.println("\n✅ Login realizado com sucesso!");
+                    return;
+                } catch (Exception e) {
+                    System.out.println("\n❌ Erro ao processar dados do login (JSON inválido ou chave ausente).");
+                }
             }
         }
     }
 
-    public static void adicionarServidor(String idEmpresa, String uuid) {
+
+    public static void adicionarServidor() {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("\nServidor ainda não cadastrado. Efetuaremos o cadastro em nosso sistema.");
-        System.out.print("Para prosseguir, pressione ENTER: ");
-        String continuar = scanner.nextLine();
+        System.out.print("\nNome do servidor: ");
+        String nome = scanner.nextLine();
 
-        JsonObject jsonServidor = Servidor.capturarInformacoesComputador();
+        System.out.print("ID do Data Center: ");
+        int fkDataCenter = Integer.parseInt(scanner.nextLine());
 
-        jsonServidor.addProperty("uuid", uuid);
-        jsonServidor.addProperty("idEmpresa", idEmpresa);
+        System.out.print("ID do componente (ex: 1 = CPU): ");
+        int nomeComponenteId = Integer.parseInt(scanner.nextLine());
 
-        String json = new Gson().toJson(jsonServidor);
+        System.out.print("ID da medida (ex: 1 = %): ");
+        int medidaId = Integer.parseInt(scanner.nextLine());
+
+        System.out.print("Limite de alerta (%): ");
+        int limite = Integer.parseInt(scanner.nextLine());
+
+        Servidor servidor = new Servidor(nome, fkDataCenter, limite, nomeComponenteId, medidaId);
+        String json = new Gson().toJson(servidor);
 
         HttpResponse<String> response = ApiClient.adicionarServidor(json);
-
         System.out.println("\n" + response.body());
     }
 
-    public static void atualizarServidor(String uuid) {
+    public static void atualizarServidor() {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("\nServidor já cadastrado. Atualizaremos as informações em nosso sistema.");
-        System.out.print("Para prosseguir, pressione ENTER: ");
-        String continuar = scanner.nextLine();
+        System.out.print("\nID do servidor a atualizar: ");
+        int idServidor = Integer.parseInt(scanner.nextLine());
 
-        JsonObject jsonServidor = Servidor.capturarInformacoesComputador();
-        jsonServidor.addProperty("uuid", uuid);
+        System.out.print("Novo nome do servidor: ");
+        String nome = scanner.nextLine();
 
-        String json = new Gson().toJson(jsonServidor);
+        System.out.print("Novo ID do Data Center: ");
+        int fkDataCenter = Integer.parseInt(scanner.nextLine());
 
-        HttpResponse<String> response = ApiClient.atualizarServidor(json);
+        System.out.print("Novo limite de alerta (%): ");
+        int limite = Integer.parseInt(scanner.nextLine());
 
+        System.out.print("ID do componente (ex: 1 = CPU): ");
+        int nomeComponenteId = Integer.parseInt(scanner.nextLine());
+
+        System.out.print("ID da medida (ex: 1 = %): ");
+        int medidaId = Integer.parseInt(scanner.nextLine());
+
+        Servidor servidor = new Servidor(nome, fkDataCenter, limite, nomeComponenteId, medidaId);
+        String json = new Gson().toJson(servidor);
+
+        HttpResponse<String> response = ApiClient.atualizarServidor(idServidor, json);
         System.out.println("\n" + response.body());
+    }
+
+
+    public static void excluirServidor() {
+        System.out.print("\nID do servidor a excluir: ");
+        int id = Integer.parseInt(scanner.nextLine());
+
+        HttpResponse<String> response = ApiClient.excluirServidor(id);
+        System.out.println("\n" + response.body());
+    }
+
+    public static void listarServidores() {
+        // Pega o id da empresa logada
+        int idEmpresa = getIdEmpresaLogada();
+
+        if (idEmpresa == -1) {
+            System.out.println("\n❌ Erro: Usuário não logado ou ID da empresa inválido.");
+            return;
+        }
+
+        HttpResponse<String> response = ApiClient.listarServidores(idEmpresa);
+
+        if (response != null && response.body() != null) {
+            System.out.println("\nServidores da Empresa ID " + idEmpresa + ":\n" + response.body());
+        } else {
+            System.out.println("\nErro ao listar servidores ou resposta vazia.");
+        }
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
 
-        System.out.print("""
-                
-                Este software tem como objetivo cadastrar seu servidor em nosso sistema para que futuramente possamos monitorá-lo,
-                ou caso já cadastrado, atualizar as informações em nosso sistema.
-                
-                Para utilizá-lo:
-                    - É necessária uma conexão com a internet;
-                    - Será solicitado um login, utilize as mesmas credencias usadas em nosso website.
-                
-                Para iniciar, pressione ENTER:""");
-        String iniciar = scanner.nextLine();
+        System.out.println("""
+            ================================
+            Sistema de Monitoramento - MONITORA
+            ================================
+            """);
 
-        JsonObject informacoesUsuarios = login();
+        login();
 
-        String idEmpresa = informacoesUsuarios.get("fkEmpresa").getAsString();
+        while (true) {
+            System.out.println("""
+                \nEscolha uma opção:
+                1 - Listar servidores
+                2 - Adicionar servidor
+                3 - Atualizar servidor
+                4 - Excluir servidor
+                0 - Sair
+                """);
 
-        if(Uuid.verificarArquivoUuid()) {
-            String uuid = Uuid.buscarUuid();
+            System.out.print("Opção: ");
+            String opcao = scanner.nextLine();
 
-            HttpResponse<String> response = ApiClient.buscarServidorUUID(uuid);
-
-            if(response.statusCode() == 403) {
-                adicionarServidor(idEmpresa, uuid);
-            } else {
-                atualizarServidor(uuid);
+            switch (opcao) {
+                case "1" -> listarServidores();
+                case "2" -> adicionarServidor();
+                case "3" -> atualizarServidor();
+                case "4" -> excluirServidor();
+                case "0" -> { System.out.println("Encerrando..."); return; }
+                default -> System.out.println("Opção inválida!");
             }
-        } else {
-            String uuid = Uuid.criarUuid();
-            adicionarServidor(idEmpresa, uuid);
         }
-
     }
 }
+
