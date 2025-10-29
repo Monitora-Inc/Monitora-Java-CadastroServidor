@@ -78,9 +78,9 @@ public class Main {
         }
 
         int fkDataCenter = dataCenters[0].get("idDataCenter").getAsInt();
-        String nomeServidor = "Servidor-" + processId.id();
+        String nomeServidor = "Servidor-" + Uuid.criarUuid();
 
-        Servidor servidor = new Servidor(processId.id(), nomeServidor, fkDataCenter);
+        Servidor servidor = new Servidor(Uuid.buscarUuid(), nomeServidor, fkDataCenter);
         String json = gson.toJson(servidor);
 
         System.out.println("Enviando servidor para cadastro...");
