@@ -13,7 +13,7 @@ public class ApiClient {
 
     static {
         try {
-            String path = "../ip_monitora.txt";
+            String path = "ip_monitora.txt";
             if (Files.exists(Paths.get(path))) {
                 String conteudo = Files.readString(Paths.get(path)).trim();
                 if (!conteudo.isEmpty()) {

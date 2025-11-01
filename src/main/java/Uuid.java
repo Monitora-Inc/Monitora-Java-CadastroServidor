@@ -2,7 +2,8 @@ import java.io.*;
 import java.util.UUID;
 
 public class Uuid {
-    public static File arquivo = new File(".uuid");
+    // Arquivo será uuid_servidor.txt
+    public static File arquivo = new File("uuid_servidor.txt");
 
     public static boolean verificarArquivoUuid() {
         return arquivo.exists();
