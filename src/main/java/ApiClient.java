@@ -1,4 +1,7 @@
 import com.google.gson.Gson;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -6,7 +9,27 @@ import java.net.http.HttpResponse;
 
 public class ApiClient {
 
-    private static final String BASE_URL = "http://localhost:3333";
+    private static String BASE_URL = "http://localhost:3333";
+
+    static {
+        try {
+            String path = "../ip_monitora.txt";
+            if (Files.exists(Paths.get(path))) {
+                String conteudo = Files.readString(Paths.get(path)).trim();
+                if (!conteudo.isEmpty()) {
+                    BASE_URL = "http://" + conteudo + ":3333";
+                    System.out.println("IP carregado do arquivo: " + BASE_URL);
+                } else {
+                    System.out.println("Arquivo ip_monitora.txt está vazio, usando localhost.");
+                }
+            } else {
+                System.out.println("Arquivo ip_monitora.txt não encontrado, usando localhost.");
+            }
+        } catch (IOException e) {
+            System.out.println("Erro ao ler ip_monitora.txt, usando localhost.");
+            e.printStackTrace();
+        }
+    }
 
     public static HttpResponse<String> adicionarServidor(String json) {
         try {
